@@ -1,16 +1,16 @@
 ﻿# Select Azure Account, Select Resource group or optionally create new resource group
 # Includes checking for multiple subscriptions before offering to select subscription.  If only one, then uses it.
 
-# Sign-in with Azure account credentials
-Add-AzureAccount
-Login-AzureRmAccount
-#region Evaluate Parameters; Create Defaults Values
 
 Param (
     [Parameter(Mandatory=$false)][string]$Location,               # Defaults to Location of Resource Group
     [Parameter(Mandatory=$false)][string]$RGName,                 # Pops List to select default
     [Parameter(Mandatory=$false)][string]$SubscriptionID          # Subscription to create RG in
 ) 
+# Sign-in with Azure account credentials
+#Add-AzureAccount
+#Login-AzureRmAccount
+#region Evaluate Parameters; Create Defaults Values
 
 #Check if parameters supplied  
 If ($SubscriptionID -eq "") {

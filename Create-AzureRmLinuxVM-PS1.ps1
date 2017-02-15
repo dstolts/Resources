@@ -63,21 +63,21 @@ Param (
 #Add-AzureRmAccount
 Login-AzureRmAccount 
 
-#  If you want to set the variables statically, just unremark this section (remove the < at the beginning and the > at the end) and change the variables
+<#  If you want to set the variables statically, just unremark this section (remove the < at the beginning and the > at the end) and change the variables
 $Location = "eastus"    # Defaults to Location of Resource Group
-$RGName =  "AzResearch-020517a"             # Pops List to select default
-$StorageAccountName ="azresearch020517a"     # Defaults to prompt user
+$RGName =  "TestLinuxVM"             # Pops List to select default
+$StorageAccountName ="testlinuxvm1028"     # Defaults to prompt user
 $Container = "registry"              # Defaults to registry
 $ScriptsContainer = "scripts"      # Defaults to scripts
 $StorageSkuName  = "Standard_LRS"          # Defaults to 'Standard_LRS'
-$VmName    =   "AzResearch01"          # Defaults to 'DockerRegHost'
-$VmDnsName  =  "azresearch01"       # Defaults to '<VMName>azvm'
-$AdminUser  =      "guruadmin"     # Defaults to Prompt User
-$AdminPass   =     "AzurePortalR0cks"      # Defaults to Prompt User
+$VmName    =   "GuruLinux01"          # Defaults to 'DockerRegHost'
+$VmDnsName  =  "gurulinux01"       # Defaults to '<VMName>azvm'
+$AdminUser  =      "mylinuxadmin"     # Defaults to Prompt User
+$AdminPass   =     "My5upperP@ss"      # Defaults to Prompt User
 $SubscriptionID  = "1942a221-7d86-4e10-9e4b-d5af2688651c"        # Subscription to create storage in
 
 $DefaultPath = $env:TEMP 
-$DefaultPath = "C:\_Data\Github\Azure-Research" 
+$DefaultPath = "C:\_Data\Github\IQSS" 
 Set-Location $DefaultPath
 #> # End Set static variables
 
@@ -173,21 +173,9 @@ If ($RGName -eq "") {
         $RGName = $myRG.ResourceGroupName  # Grab the ResourceGroupName
         $Location = $myRG.Location       # Grab the ResourceGroupLocation (region)
     }  #else user pressed escape, will need to create RG 
-} 
-
+}
 # make sure the RG exists
 $RgExists = Get-AzureRmResourceGroup | Where {$_.ResourceGroupName -eq $RGName }  # See if the RG exists.  If user pressed escape on drop box or passed a name that does not exist
-
-# Make sure the RG Exists.  Create it if it does not (user pressed cancel above)
-If (!($RgExists)) {
-  write-host "Need to create New Resource Group " -ForegroundColor Yellow
-    $RGName = Read-Host -Prompt 'What Name would you like to give your new Resource Group?'
-} 
-Else 
-{  # Need to grab the location from the RG
-    $RGName = $RGExists.ResourceGroupName  # Grab the ResourceGroupName
-    $Location = $RGExists.Location       # Grab the ResourceGroupLocation (region)
-    Write-Host "ResourceGroup $RGName in $Location on Account $SubscriptionID" -ForegroundColor Green}
 
 If ($Location -eq "") {
     Write-Host "Select Region from the list to use for Resource Group" -ForegroundColor Yellow
@@ -197,8 +185,19 @@ If ($Location -eq "") {
             Out-GridView `
             -Title "Select Azure Datacenter Region …" `
             -PassThru).location
-} Write-Host "Location: $Location " -ForegroundColor Green
+}
+Write-Host "Location: $Location " -ForegroundColor Green
 
+If ($RGName -eq "") {
+    $RGName = Read-Host -Prompt 'What Name would you like to give your new Resource Group?'
+}
+
+
+# Make sure the RG Exists.  Create it if it does not (user pressed cancel above)
+If (!($RgExists)) {
+   write-host "Need to create New Resource Group " -ForegroundColor Yellow
+} 
+Write-Host "ResourceGroup $RGName in $Location on Account $SubscriptionID" -ForegroundColor Green
 # Get/Set Storage Account Name
 If ($StorageAccountName -eq "") {
     # Need to add a loop to check name and re-enter if not valid...

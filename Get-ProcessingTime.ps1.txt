@@ -1,6 +1,6 @@
 ﻿<#   
-========= Show-ProcessingTime.ps1 ======================================= 
- Name: Show-ProcessingTime 
+========= Get-ProcessingTime.ps1 ======================================= 
+ Name: Get-ProcessingTime 
  Purpose: Demonstrate how to track and show how long a task takes to complete
      
  Author: Dan Stolts - dstolts&microsoft.com - http://ITProGuru.com

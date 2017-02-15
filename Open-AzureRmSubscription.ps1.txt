@@ -30,6 +30,9 @@ Param (
 # Sign-in with Azure account credentials
 Login-AzureRmAccount
 
+#$subscriptionID = "Subscription-ID-Goes-Here"
+#get-AzureRmSubscription | Where {$_.SubscriptionID -eq $SubscriptionID }
+
 If ($SubscriptionID -eq "") {
   # See how many subscriptions are available... 
   $mySubscriptions = Get-AzureRmSubscription

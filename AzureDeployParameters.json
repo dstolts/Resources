@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUserName": { "value": "AzureAdmin" },
+    "adminPassword": { "value": "MySamplePassw0rd$" }
+    "customVmName" : { "value": "azdeploy1103a" }
+    "vmSize"       : { "value": "MySamplePassw0rd$" }
+    "userAccount"  : { "value": "MySamplePassw0rd$" }
+  }
+}
+
+
+  "parameters": {
+    "customVmName": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the your VM"
+      }
+    },
+    "adminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "User Name for the Virtual Machine"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the size of your VM"
+      }
+    },
+    "userAccount": {
+      "type": "string",
+      "metadata": {
+        "description": "User Account for file storage"
+      }
+    }
+  },
