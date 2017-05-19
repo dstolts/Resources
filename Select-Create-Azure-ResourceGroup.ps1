@@ -37,7 +37,7 @@ If ($RGName -eq "") {
     $myRG = (Get-AzureRmResourceGroup |
          Out-GridView `
             -Title "Select an Azure Resource Group; Press <ESC> <Cancel> to create new…" `
-            -PassThru)
+            -PassThru).subscriptionID
     If (!($myRG -eq $null)) {
         $RGName = $myRG.ResourceGroupName  # Grab the ResourceGroupName
         $Location = $myRG.Location       # Grab the ResourceGroupLocation (region)

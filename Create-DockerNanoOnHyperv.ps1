@@ -3,8 +3,9 @@
 
 Powershell as admin
 
-get-executionpolicy
-set-ExecutionPolicy RemoteSigned
+$mypolicy = get-executionpolicy
+$mypolicy
+set-ExecutionPolic RemoteSigned
 
 # Mount Win2016 Iso
 Mount-DiskImage -ImagePath "C:\_Hyper-V\en_windows_server_2016_x64_dvd_9718492.iso"
@@ -12,14 +13,15 @@ Mount-DiskImage -ImagePath "C:\_Hyper-V\en_windows_server_2016_x64_dvd_9718492.i
 
 # Create folder c:\nano and copy files from nanoserver on DVD
 Try {
-  md c:\nano -erroraction SilentlyContinue
+  md c:\Techstravaganza -erroraction SilentlyContinue
 } 
 Catch {}
-copy E:\NanoServer\NanoServerImageGenerator\NanoServerImageGenerator.psm1 c:\nano -Force
-copy E:\NanoServer\NanoServerImageGenerator\Convert-WindowsImage.ps1 c:\nano -Force
-Set-Location C:\nano 
+Copy-Item E:\NanoServer\NanoServerImageGenerator\NanoServerImageGenerator.psm1 c:\Techstravaganza -Force
+Copy-Item E:\NanoServer\NanoServerImageGenerator\Convert-WindowsImage.ps1 c:\Techstravaganza -Force
+Set-Location C:\Techstravaganza 
 #import Nano Image Module to Powershell
 import-module C:\nano\NanoServerImageGenerator.psm1
+get-module
 
 
 <#
@@ -49,7 +51,7 @@ import-module C:\nano\NanoServerImageGenerator.psm1
 mkdir C:\ServicingPackages  -erroraction SilentlyContinue
 mkdir C:\ServicingPackages\expanded\KB3176936  -erroraction SilentlyContinue
 mkdir C:\ServicingPackages\expanded\KB3192366  -erroraction SilentlyContinue
-mkdir C:\ServicingPackages\expanded\KB376936
+mkdir C:\ServicingPackages\expanded\KB376936 -erroraction SilentlyContinue
 
 Write-Host "Required KBs https://technet.microsoft.com/en-us/windows-server-docs/get-started/update-nano-server"
 
@@ -60,7 +62,7 @@ $WebClient = New-Object System.Net.WebClient
 Write-Host "Download from... http://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB3192366"
 $url = "http://download.windowsupdate.com/d/msdownload/update/software/crup/2016/09/windows10.0-kb3192366-x64_af96b0015c04f5dcb186b879f07a31c32cf2e494.msu"
 $path = "C:\ServicingPackages\windows10.0-kb3192366-x64.msu"
-Write-Host "Downloading" $Path -ForegroundColor Green   
+Write-Host "Downloading" $Path from $URL -ForegroundColor Green   
 $WebClient.DownloadFile( $url, $path )
 
 # http://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB3176936
@@ -88,17 +90,17 @@ Expand  C:\ServicingPackages\windows10.0-kb3176936-x64.msu -F:*  C:\ServicingPac
 Dir C:\ServicingPackages\expanded\KB376936
 
 mkdir C:\ServicingPackages\cabs  -erroraction SilentlyContinue
-copy C:\ServicingPackages\expanded\KB376936\Windows10.0-KB3176936-x64.cab C:\ServicingPackages\cabs
-copy C:\ServicingPackages\expanded\KB3192366\Windows10.0-KB3192366-x64.cab C:\ServicingPackages\cabs
+Copy-Item C:\ServicingPackages\expanded\KB376936\Windows10.0-KB3176936-x64.cab C:\ServicingPackages\cabs
+Copy-Item C:\ServicingPackages\expanded\KB3192366\Windows10.0-KB3192366-x64.cab C:\ServicingPackages\cabs
 Dir C:\ServicingPackages\cabs
 
-
-
-
+################################
+### build the Nano Image #######
+################################\Techstravaganza\NanoTech"
+$WorkFolder = "C:\Techstravaganza"
 mkdir $WorkFolder -erroraction SilentlyContinue
-$WorkFolder = "c:\nano\UPSNano01"
-$VHDPath = "$WorkFolder\UPSNano.vhd"
-$SRV1 = "NanoUPS01"
+$VHDPath = "$WorkFolder\NanoTech02.vhd"
+$SRV1 = "NanoTech02"
 New-NanoServerImage -ServicingPackagePath 'C:\ServicingPackages\cabs\Windows10.0-KB3176936-x64.cab', 'C:\ServicingPackages\cabs\Windows10.0-KB3192366-x64.cab' -BasePath ".\Base" -TargetPath $VHDPath -MediaPath "E:\" -ComputerName $SRV1 -Package 'Microsoft-NanoServer-Compute-Package','Microsoft-NanoServer-OEM-Drivers-Package','Microsoft-NanoServer-Guest-Package','Microsoft-NanoServer-Storage-Package' -DeploymentType "Host" -Edition "Datacenter" 
 <#this is the same as the above New-NanoServerImage but cut so you can see it all
 New-NanoServerImage 
@@ -126,8 +128,30 @@ $MyNewVMName = $MyNewVM.Name
 #$MyNewVM = Get-VM -VMName $MyNewVMName
 #$MyNewVMName = $MyNewVM.Name
 $MyNewVM.Name
-Start-VM $MyNewVM 
+restart-VM $MyNewVM 
 #endregion
+
+#region PowerShell Side Demo Window
+#Connect to machine
+Write-Host "To learn more on container host deployment on Nano Server see: https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano"
+start "https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano"
+
+$VHDPath = "$WorkFolder\NanoTech01.vhd"
+$SRV1 = "NanoTech01"
+$MyNewVMName = $SRV1
+$MyNewVM = Get-VM -VMName $MyNewVMName
+$MyNewVM 
+$VMIpAddresses = Get-VM | ?{$_.VMName -eq $MyNewVM.Name} |?{$_.ReplicationMode -ne “Replica”} | Select -ExpandProperty NetworkAdapters | Select VMName, IPAddresses, Status
+$VMIpAddresses
+# Grab the IP Address you will use to connect to this NanoServer
+Write-Host "From the list above, you can type in a response or copy and paste..." -ForegroundColor Yellow
+Write-Host " What IP Address would you like to use to connect to your Nano server? " -ForegroundColor Yellow
+$MyVmIp = Read-Host 
+$MyVmIp
+Write-host "You can get Remote Management Tools for Win 10 from: https://www.microsoft.com/en-us/download/details.aspx?id=45520" -foregroundcolor green
+start "https://www.microsoft.com/en-us/download/details.aspx?id=45520"
+
+#endregion PowerShell Side Demo Window
 
 #region List the IP addresses of all VMs have user select one to use
 $VMIpAddresses = Get-VM | ?{$_.VMName -eq $MyNewVM.Name} |?{$_.ReplicationMode -ne “Replica”} | Select -ExpandProperty NetworkAdapters | Select VMName, IPAddresses, Status
@@ -137,11 +161,13 @@ Write-Host "From the list above, you can type in a response or copy and paste...
 Write-Host " What IP Address would you like to use to connect to your Nano server? " -ForegroundColor Yellow
 $MyVmIp = Read-Host "Nano server IP? " 
 $MyVmIp 
+Enter-PSSession -VMName $MyNewVMName -Credential "$MyNewVMName\Administrator"
+hostname
 #endregion
 
 #region Start the WinRM Service And authorize connection to server
 net start WinRM     
-Set-Item WSMan:\localhost\Client\TrustedHosts -Value $MyVmIp  # servername or IP
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value "$MyVmIp"  # servername or IP
 $MyVmIP
 #endregion
 
@@ -164,21 +190,30 @@ hostname
 #endregion
 
 #region Install Docker Provider
+#First we'll install the OneGet PowerShell module
 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
 Get-PackageSource
 Install-Package -Name DockerMsftProvider 
-Restart-Computer -Force
+Restart-Computer -Force   #
 sleep(10)
+Enter-PSSession -VMName $MyNewVMName -Credential "$MyNewVMName\Administrator"
+hostname
 #endregion
 
 #region Install Docker on Nano  You could also do this with container service
+dir
 Invoke-WebRequest https://get.docker.com/builds/Windows/x86_64/docker-1.13.0.zip -UseBasicParsing -OutFile docker.zip
+dir
 Expand-Archive docker.zip -DestinationPath $Env:ProgramFiles
+dir $Env:ProgramFiles
+dir "$Env:ProgramFiles\docker"
+
 Remove-Item -Force docker.zip
 cd $Env:ProgramFiles\docker
 $DockerPath = Get-Location
 dir
-Get-Service -Name docker
+write-host "The following command will error because docker is not yet registered." -ForegroundColor Green
+Get-Service -Name docker  # will error becuase it is not registered yet.
 .\dockerd.exe --register-service
 Start-Service docker
 Get-Service -Name docker
@@ -186,17 +221,21 @@ Get-Service -Name docker
 
 #region Set Path to include Docker
 # For quick use, does not require shell to be restarted.
+$($Env:PATH).Split(';')
 $env:path += ";$DockerPath"
-# For persistent use, will apply even after a reboot. 
+# For persistent use, will apply after a reboot. 
 Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH –Value $env:path
 docker info
+$($Env:PATH).Split(';')
+Restart-Computer -Force   #
+sleep(10)
 #endregion
 
 #region Connect to Nano
 #Connect to Nano
 Enter-PSSession -VMName $MyNewVMName -Credential "$MyNewVMName\Administrator"
 hostname
-
+$($Env:PATH).Split(';')
 #endregion
 
 #region Confirm Docker is running
@@ -209,30 +248,36 @@ docker info
 docker pull microsoft/nanoserver
 # Server Core
 # docker pull microsoft/windowsservercore  
+docker ps   # no running containers yet
 docker images
-"we can start a -dt background container but NOT -it Interactive"
+Write-Host "we can start a -dt background container but NOT -it Interactive" -foregroundcolor green
 docker run -dt microsoft/nanoserver
-docker ps
+
 #endregion
 
 #region List Local Machine IP Addresses
 # 
-"List Local Machine IP Addresses"
+Write-Host "List Local Machine IP Addresses" -ForegroundColor Green
 $AdminIpAddresses = get-NetIpAddress -AddressFamily IPv4 | format-table interfacealias, IPAddress, AddressState 
 $AdminIpAddresses
 # Grab the IP Address you will use to connect to NanoServer
 Write-Host "From the list above, you can type in a response or copy and paste..." -ForegroundColor Yellow
 Write-Host " What IP Address would you like to use to connect to your Nano server? " -ForegroundColor Yellow
-$AdminIp = Read-Host "Current Machine IP? " 
+$AdminIp = Read-Host  
 "Selected: $AdminIp"
 #> #List Local Machine IP Addresses
 #endregion 
 
+
 #region Prepare Host for container connectivity (Firewall And Config)
 #Create a firewall rule on the container host for the Docker connection. This will be port 2375 for an unsecure connection
-netsh advfirewall firewall add rule name="Docker daemon " dir=in action=allow protocol=TCP localport=2375                 # Allow Docker
-netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow  # Allow Ping
-"You need to make sure that you have both machines on the same network for connectivity;)"
+netsh advfirewall firewall add rule name="Docker daemon" dir=in action=allow protocol=TCP localport=2375                 # Allow Docker
+#netsh advfirewall firewall set rule Name=FPS-ICMP4-ERQ-In -Enabled Yes
+#netsh advfirewall firewall set rule name=FPS-ICMP4-ERQ-Out -Enabled True
+Get-NetFirewallRule -name FPS-ICMP4-ERQ-In -Enabled True
+Get-NetFirewallRule FPS-ICMP4-ERQ-Out
+
+Write-host "You need to make sure that you have both machines on the same network for connectivity;)"
 Write-Host "See https://docs.docker.com/engine/security/https/ for securing connection" -foregroundcolor Red
 new-item -Type File c:\ProgramData\docker\config\daemon.json
 Add-Content 'c:\programdata\docker\config\daemon.json' '{ "hosts": ["tcp://0.0.0.0:2375", "npipe://"] }'
@@ -247,6 +292,7 @@ docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}
 
 #region Start Container and Show the new container Name and IP
 $CID = (docker run  -dt --restart=always microsoft/nanoserver)  # Run docker with --restart
+Write-Host "Container ID: $CID"
 # You could also expose a port when you run with ... docker run -p 80:80 mycontainer
 $ContainerIP = docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CID
 $ContainerIP  # Display the IP address of the container
@@ -266,181 +312,3 @@ docker container ls
 Exit-pssession
 hostname   # you should now be back on your administrative workstation
 #endregion
-
-#region Prepare admin workstation 
-<#
-#Prepare for docker remote connection on the machine you will be connecting from (full GUI, not Nano)
-# From your Laptop or server you will be using to connect to nano...
-#Download Docker Engine
-Invoke-WebRequest "https://download.docker.com/components/engine/windows-server/cs-1.12/docker.zip" -OutFile "$env:TEMP\docker.zip" -UseBasicParsing
-Expand-Archive -Path "$env:TEMP\docker.zip" -DestinationPath $env:ProgramFiles
-Remove-Item "$env:TEMP\docker.zip"
-
-#region Set Path to include Docker
-# For quick use, does not require shell to be restarted.
-$env:path += ";$DockerPath"
-# For persistent use, will apply even after a reboot. 
-Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH –Value $env:path
-docker info
-#endregion
-#> 
-#endregion
-
-#region Remote Connect to Nano Host Docker
-"Connecting to Nano Host Docker"
-$DockerPort = ":2375"
-$NanoHost = "tcp://$MyVmIP$DockerPort" 
-#$NanoHost = "tcp://192.168.250.58:2375"
-[Environment]::SetEnvironmentVariable("DOCKER_HOST",$null,"User")
-[Environment]::SetEnvironmentVariable("DOCKER_HOST",$NanoHost,"User")
-"DOCKER_HOST: "
-[Environment]::GetEnvironmentVariable("DOCKER_HOST","User")
-"List Images on Nano"
-docker images
-"List Containers on Nano"
-docker ps -a
-#endregion 
-#region Ping Host from Nano
-Ping $AdminIP
-#endregion
-
-#region Connect to Local Machine Docker
-"Connected to Local Admin Host Docker"
-[Environment]::SetEnvironmentVariable("DOCKER_HOST","localhost:2375","User")
-[Environment]::GetEnvironmentVariable("DOCKER_HOST","User")
-"List Images on Admin"
-docker images
-"List Containers on Admin"
-docker ps -a
-#endregion
-
-#region List Environment Variables.
-  #"List Environment Variables"
-  #Get-ChildItem Env:
-#endregion
-
-<#
-"Pull images down locally"
-docker pull microsoft/windowsservercore
-docker pull microsoft/windowsservercore 
-docker images -a
-#> #Pull images down locally
-
-
-
-
-
-# working with nano...
-
-<# Could not get NanoServerPackage working...
-
-OLD WAY OF DOING THINGS???
-
-#https://github.com/OneGet/NanoServerPackage
-Install-PackageProvider NanoServerPackage
-Import-PackageProvider NanoServerPackage
-Save-Module -Path "$env:programfiles\WindowsPowerShell\Modules\" -Name NanoServerPackage -minimumVersion 1.0.1.0
-Import-PackageProvider NanoServerPackage
-
-#Note: If you install an optional Nano Server package from media or online repository, it won't have recent security fixes included. So you should install the latest cumulative update after installing any optional packages.
-Exit-pssession
-
-# Apply the servicing stack update first and then restart
-$s = New-PSSession -ComputerName $MyVmIp -Credential "$MyNewVMName\Administrator"
-Copy-Item -ToSession $s -Path C:\ServicingPackages_cabs -Destination C:\ServicingPackages_cabs -Recurse
-Enter-PSSession $s
-
- Add-WindowsPackage -Online -PackagePath C:\ServicingPackages_cabs\Windows10.0-KB3176936-x64.cab
- Restart-Computer
-
-
-
-
-#Install Package Management 
-#  https://blogs.msdn.microsoft.com/powershell/2016/09/29/powershellget-and-packagemanagement-in-powershell-gallery-and-github/
-
-##Before updating PowerShellGet or PackageManagement, you should always install the latest Nuget provider . To do that, run the following in an elevated PowerShell prompt:
-# These steps are for non-nano OS
-   # Powershell version 5 or greater
-#     Install-Module –Name PowerShellGet –Force –Verbose
-#   # Powershell Version Less than 5: 
-
-
-#For Nano Server, and systems running PowerShell 3 or PowerShell 4, that have installed the PackageManagement MSI, open a new PS Console and use the below PowerShellGet cmdlet to save the modules to a local directory:
-md c:\scripts 
-Save-Module PowerShellGet -Path C:\Scripts
-dir c:\scripts
-dir C:\scripts\PackageManagement
-dir C:\scripts\PowerShellGet
-
-#Restart the session
-shutdown /r /f /t 0
-Exit-PSSession
-Enter-PSSession -VMName $MyNewVMName -Credential "$MyNewVMName\Administrator"
-
-#After Re-Opening the PS Console run the following commands:
-Copy-Item “C:\Scripts\PowerShellGet\*” “$env:ProgramFiles\WindowsPowerShell\Modules\PowerShellGet\” -Recurse -Force
-Copy-Item “C:\Scripts\PackageManagement\*” “$env:ProgramFiles\WindowsPowerShell\Modules\PackageManagement\” -Recurse -Force
-# Important note: This version of PowerShellGet includes new security enhancements that validate a module author using catalog signing. Once you install this version, the first time you install either PSReadline or Pester from the Gallery you may receive an error that starts with: “The version ‘(some version)’ of the module ‘(ModuleName)’ being installed is not catalog signed. …” This is a one-time impact for these two modules. You can bypass this error for these modules by specifying –SkipPublisherCheck.  That is not a general best practice, we will be providing additional details in the coming days.
-
-
-# Configure our machine to work with PowerShell Packets
-# Install Package Provider
-Find-Package Nuget -Verbose
-Find-Packageprovider Nuget -force -verbose
-
-Install-PackageProvider Nuget –force –verbose
-Install-Module –Name PowerShellGet –Force –Verbose
-# Display the PackageManagement package
-find-module packagemanagement
-Install-Module -Name PackageManagement -Repository PSGallery -Force
-Import-Module PackageManagement
-Get-Command -Module PackageManagement
-
-find-package -provider nuget -source http://nuget.org/api/v2 zlib 
-
-# We need OneGet (https://github.com/oneget/oneget) provider PowerShell module to install docker 
-Get-PSRepository
-Find-Module DockerMsftProvider 
-Install-Module -Name DockerMsftProvider -Repository PSGallery -Force 
-Import-Module DockerMsftProvider
-
-
-#Critical Updates are required before installing containers
-$sess = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
-Invoke-CimMethod -InputObject $sess -MethodName ApplyApplicableUpdates
-Restart-Computer
-#Reconnect to Nano
-Enter-PSSession -VMName $MyNewVMName -Credential "$MyNewVMName\Administrator"
-hostname
-
-
-
-#docker install 
-
-
-Import-Module DockerMsftProvider
-Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
-
-Install-PackageProvider NanoServerPackage  # Install Nano PowerShell commands
-Import-PackageProvider NanoServerPackage   # Import/Activate Nano PowerShell Commands
-
-# Display all available packages
-
-Find-Package –AllVersions -Name "*Nano*" 
-Find-Package –AllVersions -Name "Microsoft.Powershell.Nano*" 
-Find-Package –AllVersions -Name "NanoServerPackage" 
-
-Find-
-
-#inspect package
-Save-Script -Name "NanoServerPackage" -Path "C:\Users\Administrator\Documents" -RequiredVersion 1.0.1
-
-# Requires Nano...
-Install-NanoServerPackage -Name Microsoft-NanoServer-Containers-Package
-# Generic Version 
-#Install-Package -Name Microsoft-NanoServer-Containers-Package
-
-Exit-PSSession
-
-#>

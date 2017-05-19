@@ -8,7 +8,7 @@ Login-AzureRmAccount
 $subscriptionId = 
     (Get-AzureRmSubscription |
      Out-GridView `
-        -Title "Select an Azure Subscription …" `
+        -Title "Select an Azure Subscription" `
         -PassThru).SubscriptionId
 
 Select-AzureRmSubscription `
@@ -19,7 +19,7 @@ Select-AzureRmSubscription `
 $rgName =
     (Get-AzureRmResourceGroup |
      Out-GridView `
-        -Title "Select an Azure Resource Group …" `
+        -Title "Select an Azure Resource Group" `
         -PassThru).ResourceGroupName
 
 #Download Azure Public IP Address Ranges

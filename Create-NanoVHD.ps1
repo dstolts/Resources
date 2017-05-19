@@ -13,14 +13,14 @@ Mount-DiskImage -ImagePath "C:\_Hyper-V\en_windows_server_2016_x64_dvd_9718492.i
 
 # Create folder c:\nano and copy files from nanoserver on DVD
 Try {
-  md c:\nano -erroraction SilentlyContinue
+  md c:\Techstravaganza -erroraction SilentlyContinue
 } 
 Catch {}
-copy E:\NanoServer\NanoServerImageGenerator\NanoServerImageGenerator.psm1 c:\nano -Force
-copy E:\NanoServer\NanoServerImageGenerator\Convert-WindowsImage.ps1 c:\nano -Force
-Set-Location C:\nano 
+Copy-Item E:\NanoServer\NanoServerImageGenerator\NanoServerImageGenerator.psm1 c:\techstravaganza -Force
+Copy-Item E:\NanoServer\NanoServerImageGenerator\Convert-WindowsImage.ps1 c:\techstravaganza -Force
+Set-Location C:\Techstravaganza 
 #import Nano Image Module to Powershell
-import-module C:\nano\NanoServerImageGenerator.psm1
+import-module C:\Techstravaganza\NanoServerImageGenerator.psm1
 
 
 <#
@@ -50,7 +50,7 @@ import-module C:\nano\NanoServerImageGenerator.psm1
 mkdir C:\ServicingPackages  -erroraction SilentlyContinue
 mkdir C:\ServicingPackages\expanded\KB3176936  -erroraction SilentlyContinue
 mkdir C:\ServicingPackages\expanded\KB3192366  -erroraction SilentlyContinue
-mkdir C:\ServicingPackages\expanded\KB376936
+mkdir C:\ServicingPackages\expanded\KB376936  -erroraction SilentlyContinue
 
 Write-Host "Required KBs https://technet.microsoft.com/en-us/windows-server-docs/get-started/update-nano-server"
 
@@ -89,13 +89,13 @@ Expand  C:\ServicingPackages\windows10.0-kb3176936-x64.msu -F:*  C:\ServicingPac
 Dir C:\ServicingPackages\expanded\KB376936
 
 mkdir C:\ServicingPackages\cabs  -erroraction SilentlyContinue
-copy C:\ServicingPackages\expanded\KB376936\Windows10.0-KB3176936-x64.cab C:\ServicingPackages\cabs
-copy C:\ServicingPackages\expanded\KB3192366\Windows10.0-KB3192366-x64.cab C:\ServicingPackages\cabs
+copy-item C:\ServicingPackages\expanded\KB376936\Windows10.0-KB3176936-x64.cab C:\ServicingPackages\cabs
+copy-item C:\ServicingPackages\expanded\KB3192366\Windows10.0-KB3192366-x64.cab C:\ServicingPackages\cabs
 Dir C:\ServicingPackages\cabs
 
-$WorkFolder = "c:\nano\ShipNano02"
-$VHDPath = "$WorkFolder\ShipNano02.vhd"
-$SRV1 = "ShipNano02"
+$WorkFolder = "C:\Techstravaganza\technano01"
+$VHDPath = "$WorkFolder\technano01.vhd"
+$SRV1 = "technano01"
 Try{
    New-NanoServerImage -ServicingPackagePath 'C:\ServicingPackages\cabs\Windows10.0-KB3176936-x64.cab', 'C:\ServicingPackages\cabs\Windows10.0-KB3192366-x64.cab' -BasePath ".\Base" -TargetPath $VHDPath -MediaPath "E:\" -ComputerName $SRV1 -Package 'Microsoft-NanoServer-Compute-Package','Microsoft-NanoServer-OEM-Drivers-Package','Microsoft-NanoServer-Guest-Package','Microsoft-NanoServer-Storage-Package' -DeploymentType "Host" -Edition "Datacenter" -ErrorAction Stop
    Write-Host "Finished. Nano VHD is located at: $VHDPath" -foregroundColor Green
