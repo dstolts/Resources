@@ -15,15 +15,26 @@
 # See Also http://itproguru.com/expert/2016/04/powershell-working-with-azure-resource-manager-rm-step-by-step-changing-rm-subscriptions/
  ================================================================================ 
 #># 
+
+
+#Review the Install article to get Azure PowerShell running 
+# https://docs.microsoft.com/en-us/powershell/azure/install-azurerm-ps 
+
+Get-Module PowerShellGet -list | Select-Object Name,Version,Path 	
+#If you do not have PowerShellGet installed, you will need to install the latest version of WMF
+# https://docs.microsoft.com/en-us/powershell/azure/install-azurerm-ps?view=azurermps-4.0.0#how-to-get-powershellget 
+
 #region Install and import Azure Modules 
 # remove the # in below lines to skip the prompts...
     # Azure (Service Manager)
-    Install-Module Azure            # -Force -AllowClobber
+    Install-Module Azure            -AllowClobber
     Import-Module Azure             # -Force
     # AzureRM (Resource Manager)
-    Install-module AzureRM          # -Force -AllowClobber 
+    Install-module AzureRM          -AllowClobber 
     Import-Module AzureRM           # -Force
+    Install-Module AzureRM.Compute   # -Force
     Import-Module AzureRM.Compute   # -Force
+    Install-Module Azurerm.profile   # -Force
     Import-Module Azurerm.profile   # -Force
     Import-Module Azure.storage     # -Force
     Import-Module AzureRm.Storage   # -Force
