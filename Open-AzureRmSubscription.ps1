@@ -28,7 +28,7 @@ Param (
     [Parameter(Mandatory=$false)][string]$SubscriptionID        # Subscription to create storage in
     ) 
 # Sign-in with Azure account credentials
-Login-AzureRmAccount
+#Login-AzureRmAccount
 
 #$subscriptionID = "Subscription-ID-Goes-Here"
 #get-AzureRmSubscription | Where {$_.SubscriptionID -eq $SubscriptionID }
@@ -49,6 +49,7 @@ If ($SubscriptionID -eq "") {
 $mySubscription=Select-AzureRmSubscription -SubscriptionId $subscriptionId
 $SubscriptionName = $mySubscription.Subscription.SubscriptionName
 Set-AzureRmContext -SubscriptionID $subscriptionId
+Select-AzureRmSubscription -SubscriptionId $SubscriptionID
 Write-Host "Subscription: $SubscriptionName $subscriptionId " -ForegroundColor Green
 Write-Host " Script Home: http://ITProGuru.com/Scripts" -ForegroundColor Red
 # See Also http://itproguru.com/expert/2016/04/powershell-working-with-azure-resource-manager-rm-step-by-step-changing-rm-subscriptions/
